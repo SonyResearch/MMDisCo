@@ -1,0 +1,4 @@
+defaults:
+  - base
+  - inference: mmdiff
+  - model: ??? # either of [mmdiffusion_aist++, mmdiffusion_landscape]

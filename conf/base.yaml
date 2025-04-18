@@ -1,0 +1,5 @@
+defaults:
+  - paths: default
+  - hydra: default
+
+seed: 803

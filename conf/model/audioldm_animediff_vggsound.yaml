@@ -1,0 +1,65 @@
+_target_: mmdisco.models.networks.MMDisCo
+
+residual_predictor:
+  _target_: mmdisco.models.residual_predictor.mm_block.MultimodalDiscriminator
+  video_input_type: sample_only
+  audio_input_type: sample_only
+  time_embed_dims: 128
+  text_cond: true
+  video_text_emb_dims: 768
+  audio_text_emb_dims: 512
+  last_sigmoid: true
+  ckpt_path: ${paths.ckpt_dir}/mmdisco/audioldm_animediff_vggsound.pt
+
+  feature_extractor:
+    _target_: mmdisco.models.residual_predictor.mm_block.VAResidualBlocks
+    video_cdim: 4
+    audio_cdim: 8
+    model_channels: 128
+    time_embed_dims: 128
+    num_res_blocks: 4
+    cross_attention_resolutions: []
+    cross_attention_windows: []
+    cross_attention_shift: false
+    video_attention_resolutions: []
+    audio_attention_resolutions: []
+    video_conv_type: 2d+1d
+    audio_conv_type: 2d
+    dropout: 0
+    channel_mult:
+      - 1
+      - 2
+      - 4
+    use_checkpoint: false
+    num_heads: 4
+    num_head_channels: 64
+    use_scale_shift_norm: true
+    first_norm_type: null
+    max_dila: 1
+
+  fusion_model_conf:
+    _target_: mmdisco.models.residual_predictor.mm_block.FusionModel.ModelConfig
+    fusion_type: aggregate_time_and_cat_ch
+    num_attn_layers: -1
+    model_channels: -1
+    out_channels: -1
+    use_class_token: false
+
+audio_diffusion:
+  _target_: mmdisco.models.diffusion.audio.AudioLDM
+  default_guidance_scale: 2.5
+  mel_extractor:
+    _target_: mmdisco.models.diffusion.mel_extractor.AudioLDMLogMelExtractor
+    sampling_rate: 16000
+    filter_length: 1024
+    n_mel: 64
+    mel_fmin: 0
+    mel_fmax: 8000
+    win_length: 1024
+    hop_length: 160
+
+video_diffusion:
+  _target_: mmdisco.models.diffusion.video.AnimateDiff
+  bs_micro: null
+  default_guidance_scale: 7.5
+  use_linear_schedule: false

@@ -1,0 +1,7 @@
+defaults:
+  - _self_
+  - override job_logging: custom
+
+output_subdir: null
+run:
+  dir: ./output/${hydra:job.name}

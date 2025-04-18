@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.yapf]
+based_on_style = "pep8"
+indent_width = 4
+column_limit = 100
+
+[tool.isort]
+line_length = 100
+
+[tool.ruff]
+lint.ignore = ["E741"]
+
+[project]
+name = "mmdisco"
+version = "0.0.0"
+authors = [{ name="Akio Hayakawa", email="akio.hayakawa@sony.com" }]
+description = "MMDisCo: Multi-Modal Discriminator-Guided Cooperative Diffusion for Joint Audio and Video Generation"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mmdisco"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}

@@ -1,0 +1,58 @@
+defaults:
+  - mm_diffusion: base
+  - mm_diffusion@mm_diffusion_image_sr: sr
+  - _self_
+
+_target_: mmdisco.models.networks.MMDisCoMMDiffusion
+
+mm_diffusion:
+  ckpt_path: ${paths.ckpt_dir}/mmdiffusion/AIST++.pt
+
+mm_diffusion_image_sr:
+  ckpt_path: ${paths.ckpt_dir}/mmdiffusion/AIST++_SR.pt
+
+residual_predictor:
+  _target_: mmdisco.models.residual_predictor.mm_block.MultimodalDiscriminator
+
+  video_input_type: sample_only
+  audio_input_type: sample_only
+  time_embed_dims: 128
+  text_cond: false
+  video_text_emb_dims: null
+  audio_text_emb_dims: null
+  last_sigmoid: true
+  ckpt_path: ${paths.ckpt_dir}/mmdisco/mmdiffusion_aist++.pt
+
+  feature_extractor:
+    _target_: mmdisco.models.residual_predictor.mm_block.VAResidualBlocks
+    video_cdim: 3
+    audio_cdim: 1
+    model_channels: 128
+    time_embed_dims: 128
+    num_res_blocks: 2
+    cross_attention_resolutions: []
+    cross_attention_windows: []
+    cross_attention_shift: false
+    video_attention_resolutions: []
+    audio_attention_resolutions: []
+    video_conv_type: 2d+1d
+    audio_conv_type: 1d
+    dropout: 0
+    channel_mult:
+      - 1
+      - 2
+      - 4
+    use_checkpoint: false
+    num_heads: 4
+    num_head_channels: 64
+    use_scale_shift_norm: true
+    first_norm_type: null
+    max_dila: 10
+
+  fusion_model_conf:
+    _target_: mmdisco.models.residual_predictor.mm_block.FusionModel.ModelConfig
+    fusion_type: aggregate_time_and_cat_ch
+    num_attn_layers: -1
+    model_channels: -1
+    out_channels: -1
+    use_class_token: false

@@ -1,0 +1,27 @@
+_target_: mmdisco.models.diffusion.multimodal.MMDiffusionImageSR
+
+model_flags:
+  _target_: mmdisco.models.diffusion.multimodal.ImageSRModelFlags
+  large_size: 256
+  small_size: 64
+  num_channels: 192
+  num_res_blocks: 2
+  class_cond: false
+  use_checkpoint: false
+  attention_resolutions: "8,16,32"
+  num_heads: 4
+  num_head_channels: -1
+  num_heads_upsample: -1
+  use_scale_shift_norm: true
+  dropout: 0
+  resblock_updown: true
+  use_fp16: true
+
+diffusion_flags:
+  _target_: mmdisco.models.diffusion.multimodal.DiffusionFlags
+  diffusion_steps: 1000
+  noise_schedule: linear
+  learn_sigma: true
+  timestep_respacing: ddim25
+
+sample_fn: ddim

@@ -1,0 +1,134 @@
+_target_: mmdisco.models.networks.MMDisCo
+
+residual_predictor:
+  _target_: mmdisco.models.residual_predictor.mm_block.MultimodalDiscriminator
+  video_input_type: sample_only
+  audio_input_type: sample_only
+  time_embed_dims: 128
+  text_cond: true
+  video_text_emb_dims: 1024
+  audio_text_emb_dims: 768
+  last_sigmoid: true
+  ckpt_path: ${paths.ckpt_dir}/mmdisco/auffusion_videocrafter2_vggsound.pt
+
+  feature_extractor:
+    _target_: mmdisco.models.residual_predictor.mm_block.VAResidualBlocks
+    video_cdim: 4
+    audio_cdim: 4
+    model_channels: 128
+    time_embed_dims: 128
+    num_res_blocks: 4
+    cross_attention_resolutions: []
+    cross_attention_windows: []
+    cross_attention_shift: false
+    video_attention_resolutions: []
+    audio_attention_resolutions: []
+    video_conv_type: 2d+1d
+    audio_conv_type: 2d
+    dropout: 0
+    channel_mult:
+      - 1
+      - 2
+      - 4
+    use_checkpoint: false
+    num_heads: 4
+    num_head_channels: 64
+    use_scale_shift_norm: true
+    first_norm_type: null
+    max_dila: 1
+
+  fusion_model_conf:
+    _target_: mmdisco.models.residual_predictor.mm_block.FusionModel.ModelConfig
+    fusion_type: cat_time_and_apply_transformer
+    num_attn_layers: 4
+    model_channels: 256
+    out_channels: 256
+    use_class_token: true
+
+audio_diffusion:
+  _target_: mmdisco.models.diffusion.audio.Auffusion
+  default_guidance_scale: 8.0
+
+video_diffusion:
+  _target_: mmdisco.models.diffusion.video.VideoCrafter
+  default_guidance_scale: 8.0
+  ckpt_path: ${paths.ckpt_dir}/video_crafter/base_512_v2/model.ckpt
+  fps: 8
+
+  orig_conf:
+    target: mmdisco.models.diffusion.videocrafter.models.ddpm3d.LatentDiffusion
+    params:
+      linear_start: 0.00085
+      linear_end: 0.012
+      num_timesteps_cond: 1
+      timesteps: 1000
+      first_stage_key: video
+      cond_stage_key: caption
+      cond_stage_trainable: false
+      conditioning_key: crossattn
+      image_size:
+        - 40
+        - 64
+      channels: 4
+      scale_by_std: false
+      scale_factor: 0.18215
+      use_ema: false
+      uncond_type: empty_seq
+      use_scale: true
+      scale_b: 0.7
+      unet_config:
+        target: mmdisco.models.diffusion.videocrafter.modules.networks.openaimodel3d.UNetModel
+        params:
+          in_channels: 4
+          out_channels: 4
+          model_channels: 320
+          attention_resolutions:
+            - 4
+            - 2
+            - 1
+          num_res_blocks: 2
+          channel_mult:
+            - 1
+            - 2
+            - 4
+            - 4
+          num_head_channels: 64
+          transformer_depth: 1
+          context_dim: 1024
+          use_linear: true
+          use_checkpoint: true
+          temporal_conv: true
+          temporal_attention: true
+          temporal_selfatt_only: true
+          use_relative_position: false
+          use_causal_attention: false
+          temporal_length: 16
+          addition_attention: true
+          fps_cond: true
+      first_stage_config:
+        target: mmdisco.models.diffusion.videocrafter.models.autoencoder.AutoencoderKL
+        params:
+          embed_dim: 4
+          monitor: val/rec_loss
+          ddconfig:
+            double_z: true
+            z_channels: 4
+            resolution: 512
+            in_channels: 3
+            out_ch: 3
+            ch: 128
+            ch_mult:
+              - 1
+              - 2
+              - 4
+              - 4
+            num_res_blocks: 2
+            attn_resolutions: []
+            dropout: 0.0
+          lossconfig:
+            target: torch.nn.Identity
+      cond_stage_config:
+        target: mmdisco.models.diffusion.videocrafter.modules.encoders.condition.FrozenOpenCLIPEmbedder
+        params:
+          freeze: true
+          layer: penultimate

@@ -1,0 +1,37 @@
+_target_: mmdisco.models.diffusion.multimodal.MMDiffusion
+
+model_flags:
+  _target_: mmdisco.models.diffusion.multimodal.ModelFlags
+  video_size:
+    - 16
+    - 3
+    - 64
+    - 64
+  audio_size:
+    - 1
+    - 25600
+  num_channels: 128
+  num_heads: 4
+  num_heads_upsample: -1
+  num_res_blocks: 2
+  num_head_channels: 64
+  cross_attention_resolutions: 2,4,8
+  cross_attention_windows: 1,4,8
+  cross_attention_shift: true
+  video_attention_resolutions: 2,4,8
+  audio_attention_resolutions: "-1"
+  channel_mult: ""
+  dropout: 0.0
+  class_cond: false
+  use_checkpoint: false
+  use_scale_shift_norm: true
+  resblock_updown: true
+  use_fp16: false
+  video_type: 2d+1d
+  audio_type: 1d
+
+diffusion_flags:
+  _target_: mmdisco.models.diffusion.multimodal.DiffusionFlags
+  learn_sigma: false
+  diffusion_steps: 1000
+  noise_schedule: linear

@@ -1,0 +1,13 @@
+_target_: mmdisco.models.networks.MMInferenceConfig
+
+batch_size: 4
+num_samples: 4
+
+sample_fn: dpm_solver
+
+video_fps: 10
+audio_sr: 16000
+
+joint: True
+joint_scale_audio: 1
+joint_scale_video: 1

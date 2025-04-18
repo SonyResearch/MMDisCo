@@ -1,0 +1,4 @@
+defaults:
+  - base
+  - inference: default
+  - model: ??? # either of [audioldm_animediff, auffusion_videocrafter2]
